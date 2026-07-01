@@ -1,9 +1,9 @@
 # Hive-Consult-GlobalFlow-Walkthrough 
-Welcome to the Globalflow vulnerable web application walkthrough by HIVE Consult and Nana Sei Anyemedu. This repository contain the comprehensive solutions to all the 10 vulnerabilities discovered in the web application.
+Welcome to the Globalflow vulnerable web application walkthrough. This repository contain the comprehensive solutions to all the 10 vulnerabilities discovered in the web application.
 
 
 # Overview
-The GlobalFlow Supply Chain Management (SCM) vulnerable lab is an environment designed for security training and testing for cybersecurity enthusiast and security professionals. 
+The GlobalFlow Supply Chain Management (SCM) vulnerable lab is an environment designed for security training and testing for cybersecurity enthusiast and security professionals created by HIVE Consult and Nana Sei Anyemedu. 
 
 <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/a2e50cf4-f41a-4e36-a49f-4129419db357" />
 
@@ -45,6 +45,11 @@ Of course the next thing I did as you might have guess was to go to the url and 
 
 <img width="1280" height="351" alt="2026-06-23_8" src="https://github.com/user-attachments/assets/b6041ebf-68f5-4f7a-ba00-c118d177994e" />
 
+There was also the distributor endpoint where I can request a distributor by entering and ID. When I entered a number I got access to territory, pricing and credit data.
+
+<img width="1288" height="495" alt="2026-06-23_20" src="https://github.com/user-attachments/assets/cb82c31e-93a4-4f1e-966b-d8b29baa246f" />
+
+
 # Security Misconfiguration (v10)
 Security Misconfiguration occurs when a system, application, or server is set up incorrectly in a way that exposes it to attack. This is a mistake in how the environment around the code is configured. Examples include leaving default credentials unchanged, exposing sensitive files publicly, and leaking internal system details through error messages.
 
@@ -61,6 +66,11 @@ To exploit the SQL Injection vulnerability, I logged in using the credentials I 
 
 <img width="1237" height="282" alt="image" src="https://github.com/user-attachments/assets/25baf08a-56f3-4ca9-ac29-59c4fb5947e7" />
 
+Although the challenge expected a UNION SELECT attack, reviewing the backend source code revealed that the application inserts the input into multiple LIKE clauses, causing UNION payloads to produce SQL syntax errors. This indicates the SQL injection is real, but the intended UNION exploitation path is flawed due to the lab's implementation which did not allow me to get the flag but i was able to get the flag by checking the source code.
+
+<img width="1175" height="93" alt="2026-06-23_22" src="https://github.com/user-attachments/assets/de7b29bf-57b9-4890-90e6-e73a04ff5802" />
+
+
 # IDOR — Purchase Orders (v3)
 Insecure Direct Object Reference (IDOR) occurs when an application uses a user-controllable value such as an ID, filename, or token to directly access an object or resource without verifying that the requesting user is authorized to access it. An attacker can exploit this by simply modifying that value to reference another user's data.
 
@@ -68,4 +78,52 @@ Insecure Direct Object Reference (IDOR) occurs when an application uses a user-c
 There is also the purchase order lookup feature where you lookup for an order you purchase. I was able to view  competitor pricing and margin data by increasing the number to 2.
 
 <img width="1239" height="532" alt="2026-06-23_12" src="https://github.com/user-attachments/assets/9dd07ac5-cdd5-48da-ac4c-409dcdc2077e" />
+
+# IDOR — Invoices (v4)
+Since we already have idea of what IDOR is, there will be no need to define it again so we will just go straight to the exploitaion part
+
+# Exploitation
+Another feature in the application is the invoices, where you lookup invoices using ID. I was able to use sequential invoice ID to access competitor financial records.
+
+<img width="948" height="335" alt="2026-06-23_16" src="https://github.com/user-attachments/assets/65815451-45af-4a4c-91a2-21522c241cd0" />
+
+# IDOR — Supplier Contracts (v9)
+Same concept applies to the previous definition.
+
+# Exploitation
+There was also ID used to view the supplier contracts details which by increasing the ID to 2, I was able to access confidential supplier terms without authorisation
+
+<img width="602" height="538" alt="image" src="https://github.com/user-attachments/assets/a2687106-1b6e-4c1f-a20e-17ba0d86427c" />
+
+# Price Tampering (v5)
+Price Tampering occurs when an attacker manipulates the price or quantity values of items during a transaction typically by intercepting and modifying requests sent between the client and server. If the application trusts client-supplied pricing data instead of recalculating it server-side, an attacker can purchase items at an unauthorized price, including zero or negative values.
+
+# Exploitation
+So since I can update shipment, I decided to temper with the price by adding a negative number which ended up working 
+
+<img width="950" height="441" alt="2026-06-23_14" src="https://github.com/user-attachments/assets/ed19d6ac-05df-4484-8777-4a8e59674f2a" />
+
+# Broken Authentication (v6)
+Broken Authentication occurs when weaknesses in an application's login, session management, or token handling allow attackers to compromise user accounts or impersonate other users. This can include weak passwords, missing brute force protection, improper session expiry, exposed or predictable tokens, and flawed multi-factor authentication logic any of which can allow an unauthorized party to gain access to accounts they do not own
+
+# Exploitation
+To exploit this vulnerability, I decided to login to the admin account by using default username and password admin/admin123 which logged me in
+
+<img width="421" height="503" alt="2026-06-23_19" src="https://github.com/user-attachments/assets/2419eef6-7d3c-47f1-955b-ecc0002e81f9" />
+
+# Sensitive Data Exposure (v7)
+Sensitive Data Exposure occurs when an application inadvertently reveals information that should be protected such as passwords, tokens, API keys, personal user data, or internal system details. This can happen through unencrypted storage or transmission, verbose error messages, publicly accessible files, or sensitive values hardcoded into client-facing code such as JavaScript bundles.
+
+# Exploitation
+While checking the supplier profile feature, I noticed internal cost prices and margin percentages returned in the supplier API response
+
+<img width="938" height="345" alt="2026-06-23_15" src="https://github.com/user-attachments/assets/d52ebc7f-5772-4169-830d-17171efc8e28" />
+
+# Business Logic Flaw (v8)
+Business Logic Flaw occurs when an attacker exploits weaknesses in the intended workflow or rules of an application rather than technical vulnerabilities in the code. The application functions as designed, but the design itself can be abused in ways the developers did not anticipate such as skipping payment steps, applying discounts multiple times, accessing features reserved for other user roles, or manipulating the order of operations to achieve an unauthorized outcome.
+
+# Exploitation
+Since I can create a new order, I manipulated the price by adding a negative number and the oder was accepted which resulted in fraudulent credit manipulation
+
+<img width="1238" height="466" alt="2026-06-23_21" src="https://github.com/user-attachments/assets/545ed15a-0733-470c-8c56-b38e8da355c3" />
 
